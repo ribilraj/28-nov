@@ -1,11 +1,27 @@
-FROM python:3.10.14-bookworm
-COPY requirements.txt requirements.txt
+FROM python:3.12-bookworm
+
+# Install system packages
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    curl \
+    unzip \
+    ffmpeg \
+    aria2 \
+    mediainfo \
+    poppler-utils \
+    libssl-dev \
+    python3-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
 RUN pip install --upgrade pip
-RUN apt-get update && apt-get install -y poppler-utils
-RUN apt -qq update && apt -qq install -y git wget pv jq python3-dev ffmpeg mediainfo
-RUN pip3 install -r requirements.txt
-RUN apt-get install ffmpeg
-RUN apt-get update
-RUN apt-get install -y libssl-dev aria2 ffmpeg curl unzip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project files
 COPY . .
+
+# Start Bot
 CMD ["python3", "main.py"]
